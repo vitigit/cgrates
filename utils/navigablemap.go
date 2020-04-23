@@ -72,6 +72,7 @@ func (nm NavigableMap2) Set(path PathItems, val NMInterface) (added bool, err er
 		return false, ErrWrongPath
 	}
 	nmItm, has := nm[path[0].Field]
+
 	if path[0].Index != nil { // has index, should be a slice which is kinda part of our map, hence separate handling
 		if !has {
 			nmItm = &NMSlice{}
@@ -87,6 +88,7 @@ func (nm NavigableMap2) Set(path PathItems, val NMInterface) (added bool, err er
 		}
 		return nmItm.Set(path, val)
 	}
+
 	// standard handling
 	if len(path) == 1 {
 		nm[path[0].Field] = val
