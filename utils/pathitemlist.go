@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 // PathItemElement is an element of a linked list.
+// Inspired by Go's double linked list
 type PathItemElement struct {
 	// Next and previous pointers in the doubly-linked list of elements.
 	// To simplify the implementation, internally a list l is implemented

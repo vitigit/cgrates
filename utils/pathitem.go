@@ -20,6 +20,7 @@ package utils
 
 import (
 	"strconv"
+	"strings"
 )
 
 // FullPath is the path to the item with all the needed fields
@@ -29,7 +30,7 @@ type FullPath struct {
 	// PathSlice []string
 }
 
-// NewPathToItem returns the prelucrated path to the item
+// NewPathToItem returns the computed PathItems out of slice one
 func NewPathToItem(path []string) (pItms PathItems) {
 	pItms = make(PathItems, len(path))
 	for i, v := range path {
@@ -42,21 +43,36 @@ func NewPathToItem(path []string) (pItms PathItems) {
 	return
 }
 
+// PathItems a list of PathItem used to describe the path to an item from a NavigableMap
+type PathItems []PathItem
+
+// Clone creates a copy
+func (path PathItems) Clone() (c PathItems) {
+	if path == nil {
+		return
+	}
+	c = make(PathItems, len(path))
+	for i, v := range path {
+		c[i] = v.Clone()
+	}
+	return
+}
+
+func (path PathItems) String() (out string) {
+	for _, v := range path {
+		out += NestingSep + v.String()
+	}
+	if out == "" {
+		return
+	}
+	return out[1:]
+
+}
+
 // PathItem used by the NM interface to store the path information
 type PathItem struct {
 	Field string
 	Index *int
-}
-
-// PathItems a list of PathItem used to describe the path to an item from a NavigableMap
-type PathItems []PathItem
-
-func (p PathItem) String() (out string) {
-	out = p.Field
-	if p.Index != nil {
-		out += IdxStart + strconv.Itoa(*p.Index) + IdxEnd
-	}
-	return
 }
 
 // Equal returns true if p==p2
@@ -73,6 +89,14 @@ func (p PathItem) Equal(p2 PathItem) bool {
 	return false
 }
 
+func (p PathItem) String() (out string) {
+	out = p.Field
+	if p.Index != nil {
+		out += IdxStart + strconv.Itoa(*p.Index) + IdxEnd
+	}
+	return
+}
+
 // Clone creates a copy
 func (p PathItem) Clone() (c PathItem) {
 	// if p == nil {
@@ -85,25 +109,31 @@ func (p PathItem) Clone() (c PathItem) {
 	return
 }
 
-func (path PathItems) String() (out string) {
-	for _, v := range path {
-		out += NestingSep + v.String()
+// GetPathIndex returns the path and index if index present
+// path[index]=>path,index
+// path=>path,nil
+func GetPathIndex(spath string) (opath string, idx *int) {
+	idxStart := strings.Index(spath, IdxStart)
+	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
+		return spath, nil
 	}
-	if out == "" {
-		return
+	slctr := spath[idxStart+1 : len(spath)-1]
+	opath = spath[:idxStart]
+	// if strings.HasPrefix(slctr, DynamicDataPrefix) {
+	// 	return
+	// }
+	idxVal, err := strconv.Atoi(slctr)
+	if err != nil {
+		return spath, nil
 	}
-	return out[1:]
-
+	return opath, &idxVal
 }
 
-// Clone creates a copy
-func (path PathItems) Clone() (c PathItems) {
-	if path == nil {
-		return
+func GetPathWithoutIndex(spath string) (opath string) {
+	idxStart := strings.LastIndex(spath, IdxStart)
+	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
+		return spath
 	}
-	c = make(PathItems, len(path))
-	for i, v := range path {
-		c[i] = v.Clone()
-	}
+	opath = spath[:idxStart]
 	return
 }

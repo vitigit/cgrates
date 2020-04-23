@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -28,11 +29,29 @@ func TestOrderedNavigableMap(t *testing.T) {
 	onm := NewOrderedNavigableMap()
 
 	onm.Set(PathItems{{Field: "Field1"}}, NewNMData(10))
-	onm.Set(PathItems{{Field: "Field2", Index: IntPointer(0)}}, NewNMData("1001"))
-	onm.Set(PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(0)}}, NewNMData(10))
-	onm.Set(PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(1)}}, NewNMData(11))
-	onm.Set(PathItems{{Field: "Field2", Index: IntPointer(2)}}, NewNMData(111))
-	onm.Set(PathItems{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}}, NewNMData(5))
+
+	onm.Set(
+		PathItems{{Field: "Field2", Index: IntPointer(0)}},
+		NewNMData("1001"))
+	onm.Set(
+		PathItems{
+			{Field: "Field2", Index: IntPointer(1)},
+			{Field: "Account", Index: IntPointer(0)}},
+		NewNMData(10))
+	onm.Set(
+		PathItems{
+			{Field: "Field2", Index: IntPointer(1)},
+			{Field: "Account", Index: IntPointer(1)}},
+		NewNMData(11))
+	onm.Set(
+		PathItems{{Field: "Field2", Index: IntPointer(2)}},
+		NewNMData(111))
+	onm.Set(
+		PathItems{
+			{Field: "Field3"},
+			{Field: "Field4"},
+			{Field: "Field5"}},
+		NewNMData(5))
 	var expnm NMInterface = NavigableMap2{
 		"Field1": NewNMData(10),
 		"Field2": &NMSlice{
@@ -69,9 +88,9 @@ func TestOrderedNavigableMap(t *testing.T) {
 		t.Errorf("Expected %s ,received: %s", expOrder, ToJSON(onm.GetOrder()))
 	}
 
-	path := PathItems{{Field: "Field2"}}
 	// sliceDeNM
 	exp := &NMSlice{NewNMData("500"), NewNMData("502")}
+	path := PathItems{{Field: "Field2"}}
 	if _, err := onm.Set(path, exp); err != nil {
 		t.Error(err)
 	}

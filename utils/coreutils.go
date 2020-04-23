@@ -893,48 +893,6 @@ func RandomInteger(min, max int) int {
 	return math_rand.Intn(max-min) + min
 }
 
-// GetPathIndex returns the path and index if index present
-// path[index]=>path,index
-// path=>path,nil
-func GetPathIndex(spath string) (opath string, idx *int) {
-	idxStart := strings.Index(spath, IdxStart)
-	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
-		return spath, nil
-	}
-	slctr := spath[idxStart+1 : len(spath)-1]
-	opath = spath[:idxStart]
-	// if strings.HasPrefix(slctr, DynamicDataPrefix) {
-	// 	return
-	// }
-	idxVal, err := strconv.Atoi(slctr)
-	if err != nil {
-		return spath, nil
-	}
-	return opath, &idxVal
-}
-
-// GetPathIndex returns the path and index if index present
-// path[index]=>path,index
-// path=>path,nil
-func getPathIndex(spath string) (opath string, idx string) {
-	idxStart := strings.Index(spath, IdxStart)
-	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
-		return spath, ""
-	}
-	idx = spath[idxStart+1 : len(spath)-1]
-	opath = spath[:idxStart]
-	return
-}
-
-func GetPathWithoutIndex(spath string) (opath string) {
-	idxStart := strings.LastIndex(spath, IdxStart)
-	if idxStart == -1 || !strings.HasSuffix(spath, IdxEnd) {
-		return spath
-	}
-	opath = spath[:idxStart]
-	return
-}
-
 type GetFilterIndexesArgWithArgDispatcher struct {
 	*GetFilterIndexesArg
 	TenantArg

@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "net"
+import (
+	"net"
+)
 
 // NavigableMap2 is the basic map of NM interface
 type NavigableMap2 map[string]NMInterface
@@ -65,61 +67,42 @@ func (nm NavigableMap2) Field(path PathItems) (val NMInterface, err error) {
 }
 
 // Set sets the value for the given path
-func (nm NavigableMap2) Set(path PathItems, val NMInterface) (addedNew bool, err error) {
+func (nm NavigableMap2) Set(path PathItems, val NMInterface) (added bool, err error) {
 	if len(path) == 0 {
 		return false, ErrWrongPath
 	}
-	el, has := nm[path[0].Field]
-	if len(path) == 1 {
+	nmItm, has := nm[path[0].Field]
+	if path[0].Index != nil { // has index, should be a slice which is kinda part of our map, hence separate handling
 		if !has {
-			addedNew = true
-			if path[0].Index != nil {
-				nel := &NMSlice{}
-				if _, err = nel.Set(path, val); err != nil {
-					return
-				}
-				nm[path[0].Field] = nel
+			nmItm = &NMSlice{}
+			if _, err = nmItm.Set(path, val); err != nil {
 				return
 			}
-			nm[path[0].Field] = val
+			nm[path[0].Field] = nmItm
+			added = true
 			return
 		}
-		if path[0].Index != nil {
-			if el.Type() != NMSliceType {
-				return false, ErrWrongPath
-			}
-			return el.Set(path, val)
+		if nmItm.Type() != NMSliceType {
+			return false, ErrWrongPath
 		}
+		return nmItm.Set(path, val)
+	}
+	// standard handling
+	if len(path) == 1 {
 		nm[path[0].Field] = val
+		if !has {
+			added = true
+		}
 		return
 	}
 	if !has {
-		addedNew = true
-		if path[0].Index != nil {
-			nel := &NMSlice{}
-			if _, err = nel.Set(path, val); err != nil {
-				return
-			}
-			nm[path[0].Field] = nel
-			return
-		}
-		nel := NavigableMap2{}
-		if _, err = nel.Set(path[1:], val); err != nil {
-			return
-		}
-		nm[path[0].Field] = nel
-		return
+		nmItm = NavigableMap2{}
+		nm[path[0].Field] = nmItm
 	}
-	if path[0].Index != nil {
-		if el.Type() != NMSliceType {
-			return false, ErrWrongPath
-		}
-		return el.Set(path, val)
-	}
-	if el.Type() != NMMapType { // do not try to overwrite an interface
+	if nmItm.Type() != NMMapType { // do not try to overwrite an interface
 		return false, ErrWrongPath
 	}
-	return el.Set(path[1:], val)
+	return nmItm.Set(path[1:], val)
 }
 
 // Remove removes the item for the given path
