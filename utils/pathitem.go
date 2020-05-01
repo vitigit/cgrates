@@ -23,11 +23,21 @@ import (
 	"strings"
 )
 
+// stripIdxFromLastPathElm will remove the index from the last path element
+func stripIdxFromLastPathElm(path string) string {
+	lastDotIdx := strings.LastIndexByte(path, '.')
+	lastIdxStart := strings.LastIndexByte(path, '[')
+	if lastIdxStart == -1 ||
+		(lastDotIdx != -1 && lastDotIdx > lastIdxStart) {
+		return path
+	}
+	return path[:lastIdxStart]
+}
+
 // FullPath is the path to the item with all the needed fields
 type FullPath struct {
 	PathItems PathItems
 	Path      string
-	// PathSlice []string
 }
 
 // NewPathToItem returns the computed PathItems out of slice one

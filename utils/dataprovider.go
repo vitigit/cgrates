@@ -23,6 +23,13 @@ import (
 	"strings"
 )
 
+// posible NMType
+const (
+	NMDataType NMType = iota
+	NMMapType
+	NMSliceType
+)
+
 // DataProvider is a data source from multiple formats
 type DataProvider interface {
 	String() string // printable version of data
@@ -56,13 +63,6 @@ func DPDynamicString(dnVal string, dP DataProvider) (string, error) {
 
 // NMType the type used for navigable Map
 type NMType byte
-
-// posible NMType
-const (
-	NMDataType NMType = iota
-	NMMapType
-	NMSliceType
-)
 
 // NMInterface the basic interface
 type NMInterface interface {

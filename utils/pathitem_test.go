@@ -23,6 +23,37 @@ import (
 	"testing"
 )
 
+func TestStripIdxFromLastPathElm(t *testing.T) {
+	str := ""
+	if strp := stripIdxFromLastPathElm(str); strp != "" {
+		t.Errorf("received: <%s>", strp)
+	}
+	str = "mypath[0]"
+	if strp := stripIdxFromLastPathElm(str); strp != "mypath" {
+		t.Errorf("received: <%s>", strp)
+	}
+	str = "mypath"
+	if strp := stripIdxFromLastPathElm(str); strp != "mypath" {
+		t.Errorf("received: <%s>", strp)
+	}
+	str = "mypath.mypath2[0]"
+	if strp := stripIdxFromLastPathElm(str); strp != "mypath.mypath2" {
+		t.Errorf("received: <%s>", strp)
+	}
+	str = "mypath.mypath2"
+	if strp := stripIdxFromLastPathElm(str); strp != "mypath.mypath2" {
+		t.Errorf("received: <%s>", strp)
+	}
+	str = "mypath[1].mypath2[0]"
+	if strp := stripIdxFromLastPathElm(str); strp != "mypath[1].mypath2" {
+		t.Errorf("received: <%s>", strp)
+	}
+	str = "mypath[1].mypath2"
+	if strp := stripIdxFromLastPathElm(str); strp != "mypath[1].mypath2" {
+		t.Errorf("received: <%s>", strp)
+	}
+}
+
 func TestNewPathToItem(t *testing.T) {
 	pathSlice := strings.Split("*req.Field1[0].Account", NestingSep)
 	expected := PathItems{{Field: MetaReq}, {Field: "Field1", Index: IntPointer(0)}, {Field: Account}}

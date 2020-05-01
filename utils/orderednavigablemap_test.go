@@ -24,33 +24,105 @@ import (
 )
 
 func TestOrderedNavigableMap(t *testing.T) {
-	// var err error
 	onm := NewOrderedNavigableMap()
 
 	onm.Set(PathItems{{Field: "Field1"}}, NewNMData(10))
+	expOrder := []PathItems{
+		PathItems{{Field: "Field1"}},
+	}
+	if !reflect.DeepEqual(expOrder, onm.GetOrder()) {
+		t.Errorf("Expected %s ,received: %s", expOrder, ToJSON(onm.GetOrder()))
+	}
 
 	onm.Set(
 		PathItems{{Field: "Field2", Index: IntPointer(0)}},
 		NewNMData("1001"))
+	expOrder = []PathItems{
+		PathItems{{Field: "Field1"}},
+		PathItems{{Field: "Field2", Index: IntPointer(0)}},
+	}
+	if !reflect.DeepEqual(expOrder, onm.GetOrder()) {
+		t.Errorf("Expected %s ,received: %s", expOrder, ToJSON(onm.GetOrder()))
+	}
+
 	onm.Set(
 		PathItems{
 			{Field: "Field2", Index: IntPointer(1)},
 			{Field: "Account", Index: IntPointer(0)}},
 		NewNMData(10))
+	expOrder = []PathItems{
+		PathItems{{Field: "Field1"}},
+		PathItems{{Field: "Field2", Index: IntPointer(0)}},
+		PathItems{
+			{Field: "Field2", Index: IntPointer(1)},
+			{Field: "Account", Index: IntPointer(0)}},
+	}
+	if !reflect.DeepEqual(expOrder, onm.GetOrder()) {
+		t.Errorf("Expected %s ,received: %s", expOrder, ToJSON(onm.GetOrder()))
+	}
+
 	onm.Set(
 		PathItems{
 			{Field: "Field2", Index: IntPointer(1)},
 			{Field: "Account", Index: IntPointer(1)}},
 		NewNMData(11))
+	expOrder = []PathItems{
+		PathItems{{Field: "Field1"}},
+		PathItems{{Field: "Field2", Index: IntPointer(0)}},
+		PathItems{
+			{Field: "Field2", Index: IntPointer(1)},
+			{Field: "Account", Index: IntPointer(0)}},
+		PathItems{
+			{Field: "Field2", Index: IntPointer(1)},
+			{Field: "Account", Index: IntPointer(1)}},
+	}
+	if !reflect.DeepEqual(expOrder, onm.GetOrder()) {
+		t.Errorf("Expected %s ,received: %s", expOrder, ToJSON(onm.GetOrder()))
+	}
+
 	onm.Set(
 		PathItems{{Field: "Field2", Index: IntPointer(2)}},
 		NewNMData(111))
+	expOrder = []PathItems{
+		PathItems{{Field: "Field1"}},
+		PathItems{{Field: "Field2", Index: IntPointer(0)}},
+		PathItems{
+			{Field: "Field2", Index: IntPointer(1)},
+			{Field: "Account", Index: IntPointer(0)}},
+		PathItems{
+			{Field: "Field2", Index: IntPointer(1)},
+			{Field: "Account", Index: IntPointer(1)}},
+		PathItems{{Field: "Field2", Index: IntPointer(2)}},
+	}
+	if !reflect.DeepEqual(expOrder, onm.GetOrder()) {
+		t.Errorf("Expected %s ,received: %s", expOrder, ToJSON(onm.GetOrder()))
+	}
+
 	onm.Set(
 		PathItems{
 			{Field: "Field3"},
 			{Field: "Field4"},
 			{Field: "Field5"}},
 		NewNMData(5))
+	expOrder = []PathItems{
+		PathItems{{Field: "Field1"}},
+		PathItems{{Field: "Field2", Index: IntPointer(0)}},
+		PathItems{
+			{Field: "Field2", Index: IntPointer(1)},
+			{Field: "Account", Index: IntPointer(0)}},
+		PathItems{
+			{Field: "Field2", Index: IntPointer(1)},
+			{Field: "Account", Index: IntPointer(1)}},
+		PathItems{{Field: "Field2", Index: IntPointer(2)}},
+		PathItems{
+			{Field: "Field3"},
+			{Field: "Field4"},
+			{Field: "Field5"}},
+	}
+	if !reflect.DeepEqual(expOrder, onm.GetOrder()) {
+		t.Errorf("Expected %s ,received: %s", expOrder, ToJSON(onm.GetOrder()))
+	}
+
 	var expnm NMInterface = NavigableMap2{
 		"Field1": NewNMData(10),
 		"Field2": &NMSlice{
@@ -75,17 +147,6 @@ func TestOrderedNavigableMap(t *testing.T) {
 	if !reflect.DeepEqual(expnm, onm.nm) {
 		t.Errorf("Expected %s ,received: %s", expnm, onm.nm)
 	}
-	expOrder := []PathItems{
-		PathItems{{Field: "Field1"}},
-		PathItems{{Field: "Field2", Index: IntPointer(0)}},
-		PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(0)}},
-		PathItems{{Field: "Field2", Index: IntPointer(1)}, {Field: "Account", Index: IntPointer(1)}},
-		PathItems{{Field: "Field2", Index: IntPointer(2)}},
-		PathItems{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}},
-	}
-	if !reflect.DeepEqual(expOrder, onm.GetOrder()) {
-		t.Errorf("Expected %s ,received: %s", expOrder, ToJSON(onm.GetOrder()))
-	}
 
 	// sliceDeNM
 	exp := &NMSlice{NewNMData("500"), NewNMData("502")}
@@ -99,12 +160,14 @@ func TestOrderedNavigableMap(t *testing.T) {
 	} else if !reflect.DeepEqual(val, exp) {
 		t.Errorf("Expected %q ,received: %q", exp, val.Interface())
 	}
-
 	expOrder = []PathItems{
 		PathItems{{Field: "Field1"}},
-		PathItems{{Field: "Field3"}, {Field: "Field4"}, {Field: "Field5"}},
+		PathItems{
+			{Field: "Field3"},
+			{Field: "Field4"},
+			{Field: "Field5"}},
 		PathItems{{Field: "Field2", Index: IntPointer(0)}},
-		PathItems{{Field: "Field2", Index: IntPointer(1)}},
+	    PathItems{{Field: "Field2", Index: IntPointer(1)}},
 	}
 	if !reflect.DeepEqual(expOrder, onm.GetOrder()) {
 		t.Errorf("Expected %s ,received: %s", expOrder, onm.GetOrder())
@@ -115,6 +178,21 @@ func TestOrderedNavigableMap(t *testing.T) {
 		t.Error(err)
 	} else if val.Interface() != "500" {
 		t.Errorf("Expected %q ,received: %q", "500", val.Interface())
+	}
+	expnm  = NavigableMap2{
+		"Field1": NewNMData(10),
+		"Field3": NavigableMap2{
+			"Field4": NavigableMap2{
+				"Field5": NewNMData(5),
+			},
+		},
+		"Field2": &NMSlice{
+			NewNMData("500"),
+			NewNMData("502"),
+		},
+	}
+	if !reflect.DeepEqual(expnm, onm.nm) {
+		t.Errorf("Expected %s ,received: %s", expnm, onm.nm)
 	}
 }
 

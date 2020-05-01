@@ -90,13 +90,14 @@ func (nm NavigableMap2) Set(path PathItems, val NMInterface) (added bool, err er
 	}
 
 	// standard handling
-	if len(path) == 1 {
+	if len(path) == 1 { // always overwrite for single path
 		nm[path[0].Field] = val
 		if !has {
 			added = true
 		}
 		return
 	}
+	// from here we should deal only with navmaps due to multiple path
 	if !has {
 		nmItm = NavigableMap2{}
 		nm[path[0].Field] = nmItm
